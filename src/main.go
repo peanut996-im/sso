@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"framework/api"
 	"framework/cfgargs"
 	"framework/logger"
 	"log"
@@ -34,6 +32,6 @@ func main() {
 		"age":  []string{"20"},
 	}
 
-	fmt.Println(api.MakeSign(vals, "88888888"))
+	// fmt.Println(api.MakeSign(vals, "88888888"))
 
 }
