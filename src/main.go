@@ -4,7 +4,6 @@ import (
 	"framework/cfgargs"
 	"framework/logger"
 	"log"
-	"net/url"
 )
 
 var (
@@ -26,11 +25,6 @@ func main() {
 	logger.InitLogger(srvConfig)
 
 	logger.Info("App login started...")
-
-	vals := url.Values{
-		"name": []string{"Jack"},
-		"age":  []string{"20"},
-	}
 
 	// fmt.Println(api.MakeSign(vals, "88888888"))
 
