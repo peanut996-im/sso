@@ -16,7 +16,7 @@ else
     echo
 fi
 targetos=$1
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 
 bash ./mod.sh
 
