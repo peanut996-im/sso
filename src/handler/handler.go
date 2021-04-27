@@ -1,32 +1,24 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
-	"sso/model"
 
+	"framework/api/model"
+	"framework/db"
+	"framework/logger"
 	"framework/net"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SignIn(c *gin.Context) {
-	login := model.NewLogin()
-	// err := c.BindJSON(login)
+	login := newLogin()
 	err := c.ShouldBind(login)
 	if err != nil {
-		c.JSON(http.StatusOK, net.BaseRepsonse{
-			Code:    net.ERROR_HTTP_INNER_ERROR,
-			Data:    struct{}{},
-			Message: fmt.Sprintf(net.ErrorCodeToString(net.ERROR_HTTP_INNER_ERROR), err),
-		})
+		c.JSON(http.StatusOK, net.NewHttpInnerErrorResp(err))
 		return
 	}
-	c.JSON(200, net.BaseRepsonse{
-		Code:    net.ERROR_CODE_OK,
-		Data:    nil,
-		Message: net.ErrorCodeToString(net.ERROR_CODE_OK),
-	})
+	c.JSON(200, net.NewSuccessResponse(nil))
 }
 
 func SignOut(c *gin.Context) {
@@ -34,5 +26,22 @@ func SignOut(c *gin.Context) {
 }
 
 func SignUp(c *gin.Context) {
-	c.String(200, "this is register")
+	login := newLogin()
+	mongo := db.GetLastMongoClient()
+	// rds := db.GetLastRedisClient()
+
+	err := c.ShouldBind(login)
+	if err != nil {
+		c.JSON(http.StatusOK, net.NewHttpInnerErrorResp(err))
+		return
+	}
+	user := model.NewUser(login.Account, login.Password)
+	res, err := mongo.InsertOne("user", user)
+	if err != nil {
+		logger.Error("mongo insert user err: %v", err)
+		c.JSON(http.StatusOK, net.NewHttpInnerErrorResp(err))
+		return
+	}
+	logger.Debug("mongo insert user success", res.InsertedID)
+	c.JSON(200, net.NewSuccessResponse(nil))
 }
