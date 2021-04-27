@@ -4,6 +4,9 @@ import (
 	"framework/cfgargs"
 	"framework/logger"
 	"log"
+	"os"
+	"os/signal"
+	"sso/app"
 )
 
 var (
@@ -23,9 +26,13 @@ func main() {
 	}
 
 	logger.InitLogger(srvConfig)
+	app.GetApp().Init(srvConfig)
 
-	logger.Info("App login started...")
+	logger.Info("App sso started...")
 
-	// fmt.Println(api.MakeSign(vals, "88888888"))
-
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	logger.Info("Shutting down server...")
+	return
 }
