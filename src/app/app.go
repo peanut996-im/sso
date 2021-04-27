@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"framework/cfgargs"
+	"framework/db"
 	"framework/logger"
 	"framework/net"
 	"framework/net/http"
@@ -31,27 +32,36 @@ func GetApp() *App {
 }
 
 func (a *App) Init(cfg *cfgargs.SrvConfig) {
-	a.srvCfg = cfg
+
+	//db
+	db.InitRedisClient(cfg)
+	err := db.InitMongoClient(cfg)
+	if err != nil {
+		logger.Fatal("init mongo db err: %v", err)
+		return
+	}
 
 	gin.DefaultWriter = logger.MultiWriter(logger.DefLogger().GetLogWriters()...)
-
-	a.httpSrv = http.NewServer(a.srvCfg)
-
+	a.httpSrv = http.NewServer(cfg)
 	if cfg.HTTP.Sign {
 		a.httpSrv.Use(http.CheckSign(cfg))
 	}
 
+	//gin
 	a.httpSrv.AddNodeRoute(a.GetNodeRoute()...)
-	go a.httpSrv.Serve(a.srvCfg) //nolint: errcheck
+	go a.httpSrv.Serve(cfg) //nolint: errcheck
 
+	a.srvCfg = cfg
 }
 
+//GetNodeRoute Mount routes to the http server.
 func (a *App) GetNodeRoute() []*http.NodeRoute {
 	routers := []*http.Route{}
+
 	routers = append(routers, http.NewRoute(net.HTTP_METHOD_POST, "login", handler.SignIn))
 	routers = append(routers, http.NewRoute(net.HTTP_METHOD_POST, "register", handler.SignUp))
 	routers = append(routers, http.NewRoute(net.HTTP_METHOD_POST, "logout", handler.SignOut))
-	routers = append(routers, http.NewRoute(net.HTTP_METHOD_POST, "login/user", handler.SignUp))
+
 	node := http.NewNodeRoute("", routers...)
 	return []*http.NodeRoute{node}
 }
