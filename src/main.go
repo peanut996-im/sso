@@ -30,9 +30,11 @@ func main() {
 
 	logger.Info("App sso started...")
 
-	quit := make(chan os.Signal, 1)
+	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	logger.Info("Shutting down server...")
-	return
+	logger.Fatal("Server force shutdown...")
+	// logger.Info("Shutting down server...")
+	close(quit)
+	os.Exit(1)
 }
