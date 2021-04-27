@@ -34,7 +34,6 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 	logger.Fatal("Server force shutdown...")
-	// logger.Info("Shutting down server...")
 	close(quit)
 	os.Exit(1)
 }

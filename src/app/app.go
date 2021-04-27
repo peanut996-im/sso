@@ -37,7 +37,10 @@ func (a *App) Init(cfg *cfgargs.SrvConfig) {
 
 	a.httpSrv = http.NewServer(a.srvCfg)
 
-	a.httpSrv.Use(http.CheckSign(cfg))
+	if cfg.HTTP.Sign {
+		a.httpSrv.Use(http.CheckSign(cfg))
+	}
+
 	a.httpSrv.AddNodeRoute(a.GetNodeRoute()...)
 	go a.httpSrv.Serve(a.srvCfg) //nolint: errcheck
 
