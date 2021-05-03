@@ -24,10 +24,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	srvConfig.Print()
 	logger.InitLogger(srvConfig)
 	app.GetApp().Init(srvConfig)
-
 	logger.Info("App sso started...")
 
 	quit := make(chan os.Signal)
