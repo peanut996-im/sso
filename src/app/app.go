@@ -65,3 +65,7 @@ func (a *App) GetNodeRoute() []*http.NodeRoute {
 	node := http.NewNodeRoute("", routers...)
 	return []*http.NodeRoute{node}
 }
+
+func (a *App) GetSrvCfg() *cfgargs.SrvConfig {
+	return a.srvCfg
+}

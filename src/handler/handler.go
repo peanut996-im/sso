@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"framework/api"
+	"framework/cfgargs"
 	"framework/db"
 	"framework/logger"
 	"framework/net"
@@ -25,7 +27,7 @@ func SignIn(c *gin.Context) {
 	logger.Debug("mongo find account: %v", login.Account)
 	filter := bson.M{"account": login.Account}
 	user := &api.User{}
-	err = mongo.FindOne("user", user, filter)
+	err = mongo.FindOne("User", user, filter)
 
 	if err != nil {
 		// user not found
@@ -34,7 +36,7 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
-	if user.Password == api.EncryptBySha1(login.Password) {
+	if user.Password == api.EncryptBySha1(fmt.Sprintf("%v%v", login.Password, cfgargs.GetLastSrvConfig().AppKey)) {
 		token, err := api.InsertToken(user.UID)
 		if err != nil {
 			// token failed
@@ -95,11 +97,11 @@ func SignUp(c *gin.Context) {
 	// 先看是否重复
 	filter := bson.M{"account": register.Account}
 	user := &api.User{}
-	err = mongo.FindOne("user", user, filter)
+	err = mongo.FindOne("User", user, filter)
 
 	if db.IsNoDocumentError(err) {
-		user := api.NewUser(register.Account, api.EncryptBySha1(register.Password))
-		res, err := mongo.InsertOne("user", user)
+		user := api.NewUser(register.Account, api.EncryptBySha1(fmt.Sprintf("%v%v", register.Password, cfgargs.GetLastSrvConfig().AppKey)))
+		res, err := mongo.InsertOne("User", user)
 		if err != nil {
 			logger.Error("mongo insert user err: %v", err)
 			c.JSON(http.StatusOK, net.NewHttpInnerErrorResp(err))
