@@ -32,7 +32,7 @@ func GetApp() *App {
 }
 
 func (a *App) Init(cfg *cfgargs.SrvConfig) {
-
+	a.srvCfg = cfg
 	//db
 	db.InitRedisClient(cfg)
 	err := db.InitMongoClient(cfg)
@@ -40,18 +40,18 @@ func (a *App) Init(cfg *cfgargs.SrvConfig) {
 		logger.Fatal("init mongo db err: %v", err)
 		return
 	}
-
+	//gin
 	gin.DefaultWriter = logger.MultiWriter(logger.DefLogger().GetLogWriters()...)
 	a.httpSrv = http.NewServer(cfg)
 	if cfg.HTTP.Sign {
 		a.httpSrv.Use(http.CheckSign(cfg))
 	}
-
-	//gin
+	if cfg.HTTP.Cors {
+		a.httpSrv.Use(http.CORS())
+	}
 	a.httpSrv.AddNodeRoute(a.GetNodeRoute()...)
 	go a.httpSrv.Serve(cfg) //nolint: errcheck
 
-	a.srvCfg = cfg
 }
 
 //GetNodeRoute Mount routes to the http server.
