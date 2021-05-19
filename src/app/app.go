@@ -43,12 +43,6 @@ func (a *App) Init(cfg *cfgargs.SrvConfig) {
 	//gin
 	gin.DefaultWriter = logger.MultiWriter(logger.DefLogger().GetLogWriters()...)
 	a.httpSrv = http.NewServer(cfg)
-	if cfg.HTTP.Sign {
-		a.httpSrv.Use(http.CheckSign(cfg))
-	}
-	if cfg.HTTP.Cors {
-		a.httpSrv.Use(http.CORS())
-	}
 	a.httpSrv.AddNodeRoute(a.GetNodeRoute()...)
 	go a.httpSrv.Serve(cfg) //nolint: errcheck
 
