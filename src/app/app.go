@@ -19,7 +19,7 @@ var (
 )
 
 type App struct {
-	srvCfg  *cfgargs.SrvConfig
+	cfg     *cfgargs.SrvConfig
 	httpSrv *http.Server
 }
 
@@ -32,7 +32,7 @@ func GetApp() *App {
 }
 
 func (a *App) Init(cfg *cfgargs.SrvConfig) {
-	a.srvCfg = cfg
+	a.cfg = cfg
 	//db
 	db.InitRedisClient(cfg)
 	err := db.InitMongoClient(cfg)
@@ -61,5 +61,5 @@ func (a *App) GetNodeRoute() []*http.NodeRoute {
 }
 
 func (a *App) GetSrvCfg() *cfgargs.SrvConfig {
-	return a.srvCfg
+	return a.cfg
 }
