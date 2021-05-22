@@ -3,7 +3,7 @@ package handler
 import (
 	"fmt"
 	"framework/api/model"
-	"framework/encoding"
+	"framework/tool"
 	"net/http"
 
 	"framework/api"
@@ -31,7 +31,7 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
-	if user.Password == encoding.EncryptBySha1(fmt.Sprintf("%v%v", login.Password, cfgargs.GetLastSrvConfig().AppKey)) {
+	if user.Password == tool.EncryptBySha1(fmt.Sprintf("%v%v", login.Password, cfgargs.GetLastSrvConfig().AppKey)) {
 		token, err := api.InsertToken(user.UID)
 		if err != nil {
 			// token failed
@@ -91,7 +91,7 @@ func SignUp(c *gin.Context) {
 	// 先看是否重复
 	_, err = model.GetUserByAccount(register.Account)
 	if db.IsNoDocumentError(err) {
-		user := model.NewUser(register.Account, encoding.EncryptBySha1(fmt.Sprintf("%v%v", register.Password, cfgargs.GetLastSrvConfig().AppKey)))
+		user := model.NewUser(register.Account, tool.EncryptBySha1(fmt.Sprintf("%v%v", register.Password, cfgargs.GetLastSrvConfig().AppKey)))
 		if err = model.InsertUser(user); err != nil {
 			logger.Error("SSO.Register err: %v", err)
 			c.JSON(http.StatusOK, api.NewHttpInnerErrorResponse(err))
