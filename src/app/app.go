@@ -52,9 +52,9 @@ func (a *App) Init(cfg *cfgargs.SrvConfig) {
 func (a *App) GetNodeRoute() []*http.NodeRoute {
 	routers := []*http.Route{}
 
-	routers = append(routers, http.NewRoute(api.HTTP_METHOD_POST, "login", handler.SignIn))
-	routers = append(routers, http.NewRoute(api.HTTP_METHOD_POST, "register", handler.SignUp))
-	routers = append(routers, http.NewRoute(api.HTTP_METHOD_POST, "logout", handler.SignOut))
+	routers = append(routers, http.NewRoute(api.HTTPMethodPost, "login", handler.SignIn))
+	routers = append(routers, http.NewRoute(api.HTTPMethodPost, "register", handler.SignUp))
+	routers = append(routers, http.NewRoute(api.HTTPMethodPost, "logout", handler.SignOut))
 
 	node := http.NewNodeRoute("", routers...)
 	return []*http.NodeRoute{node}
