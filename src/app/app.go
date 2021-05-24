@@ -2,6 +2,7 @@ package app
 
 import (
 	"framework/api"
+	"github.com/gin-gonic/gin"
 	"sso/handler"
 	"sync"
 
@@ -9,8 +10,6 @@ import (
 	"framework/db"
 	"framework/logger"
 	"framework/net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -32,6 +31,7 @@ func GetApp() *App {
 }
 
 func (a *App) Init(cfg *cfgargs.SrvConfig) {
+	gin.DefaultWriter = logger.MultiWriter(logger.DefLogger().GetLogWriters()...)
 	a.cfg = cfg
 	//db
 	db.InitRedisClient(cfg)
@@ -40,16 +40,15 @@ func (a *App) Init(cfg *cfgargs.SrvConfig) {
 		logger.Fatal("init mongo db err: %v", err)
 		return
 	}
-	//gin
-	gin.DefaultWriter = logger.MultiWriter(logger.DefLogger().GetLogWriters()...)
-	a.httpSrv = http.NewServer(cfg)
-	a.httpSrv.AddNodeRoute(a.GetNodeRoute()...)
-	go a.httpSrv.Serve(cfg) //nolint: errcheck
+	a.httpSrv = http.NewServer()
+	a.httpSrv.Init(cfg)
+	a.httpSrv.AddNodeRoute(a.GetHandlers()...)
+	go a.httpSrv.Run() //nolint: errcheck
 
 }
 
-//GetNodeRoute Mount routes to the http server.
-func (a *App) GetNodeRoute() []*http.NodeRoute {
+//GetHandlers Mount routes to the http server.
+func (a *App) GetHandlers() []*http.NodeRoute {
 	routers := []*http.Route{}
 
 	routers = append(routers, http.NewRoute(api.HTTPMethodPost, "login", handler.SignIn))
